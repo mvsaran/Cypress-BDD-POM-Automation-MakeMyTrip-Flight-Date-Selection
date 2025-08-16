@@ -45,7 +45,51 @@ Verify installation:
 ```bash
 node -v
 npm -v
+✅ Prerequisite Dependencies
+Cypress
+npm install cypress --save-dev
+
+Cucumber Preprocessor
+(Choose the new maintained one)
+npm install @badeball/cypress-cucumber-preprocessor --save-dev
+
+Esbuild Preprocessor (for bundling feature files with Cypress 10+)
+npm install @bahmutov/cypress-esbuild-preprocessor --save-dev
+
+Cucumber Messages & Pickles
+(required by the preprocessor for parsing .feature files)
+npm install @cucumber/messages @cucumber/cucumber --save-dev
+
+Optional Plugins
+Multiple reporters (if needed, like Mochawesome or Allure)
+
+npm install cypress-mochawesome-reporter --save-dev
 git --version
+
+⚙️ Config Setup
+
+In cypress.config.js:
+const { defineConfig } = require("cypress");
+const createBundler = require("@bahmutov/cypress-esbuild-preprocessor");
+const preprocessor = require("@badeball/cypress-cucumber-preprocessor");
+const createEsbuildPlugin =
+  require("@badeball/cypress-cucumber-preprocessor/esbuild").createEsbuildPlugin;
+
+module.exports = defineConfig({
+  e2e: {
+    specPattern: "**/*.feature",   // run feature files
+    setupNodeEvents(on, config) {
+      on(
+        "file:preprocessor",
+        createBundler({
+          plugins: [createEsbuildPlugin(config)],
+        })
+      );
+      preprocessor.addCucumberPreprocessorPlugin(on, config);
+      return config;
+    },
+  },
+});
 ```
 
 ---
